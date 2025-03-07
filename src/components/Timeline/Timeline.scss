@@ -1,0 +1,38 @@
+.timeline {
+	position: relative;
+	max-width: 800px;
+	margin: 2rem auto;
+
+	&-circle {
+		position: relative;
+		width: 300px;
+		height: 300px;
+		margin: 0 auto;
+		border: 2px solid #333;
+		border-radius: 50%;
+	}
+
+	&-dot {
+		position: absolute;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: #ccc;
+		transform: translate(-50%, -50%);
+		transition: all 0.3s;
+		cursor: pointer;
+
+		&.active {
+			background: #2196f3;
+			transform: translate(-50%, -50%) scale(1.2);
+		}
+	}
+
+	&-info {
+		margin-top: 2rem;
+
+		.swiper-container {
+			padding: 20px;
+		}
+	}
+}
