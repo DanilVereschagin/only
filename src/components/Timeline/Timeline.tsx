@@ -1,96 +1,98 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Swiper from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, A11y } from 'swiper/modules';
+import 'swiper/scss';
+import 'swiper/scss/navigation';
 import { gsap } from 'gsap';
 import './Timeline.scss';
-import 'swiper/swiper-bundle.css';
-
-interface TimelineEvent {
-	date: string;
-	year: string;
-	description: string;
-}
-
-interface TimelineProps {
-	periods: {
-		year: number;
-		events: TimelineEvent[];
-	}[];
-}
+import { TimelineProps } from '../../types/Timeline';
+import TimeButton from '../Button/TimeButton';
 
 const Timeline: React.FC<TimelineProps> = ({ periods }) => {
-	const [activeYear, setActiveYear] = useState(periods[0].year);
-	const swiperRef = useRef<Swiper | null>(null);
+	const [activeSlice, setActiveSlice] = useState(periods[0].id);
+	const [positions, setPositions] = useState<{ x: number; y: number }[]>([]);
 	const circleRef = useRef<HTMLDivElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// Расчет позиций для точек
 	const calculatePositions = () => {
 		const count = periods.length;
-		return periods.map((_, index) => {
+
+		const circle = circleRef.current;
+		if (!circle) return [];
+
+		const { width, height } = circle.getBoundingClientRect();
+		const radius = width / 2;
+
+		const newPositions = periods.map((_, index) => {
 			const angle = (index * 360) / count - 90;
+			const x = Math.cos((angle * Math.PI) / 180) * radius;
+			const y = Math.sin((angle * Math.PI) / 180) * radius;
 			return {
-				x: Math.cos((angle * Math.PI) / 180) * 120 + 150,
-				y: Math.sin((angle * Math.PI) / 180) * 120 + 150,
+				x: x + radius,
+				y: y + radius,
 			};
 		});
+
+		setPositions(newPositions);
 	};
 
-	// Инициализация Swiper
-	const initSwiper = () => {
-		swiperRef.current = new Swiper(`.swiper-container-${activeYear}`, {
-			slidesPerView: 1,
-			spaceBetween: 30,
-		});
-	};
-
-	// Анимация переключения
 	const animateTransition = () => {
 		gsap.from(containerRef.current, {
 			duration: 0.5,
-			opacity: 0.5,
 			y: 20,
 		});
 	};
 
 	useEffect(() => {
-		initSwiper();
 		animateTransition();
-		return () => swiperRef.current?.destroy();
-	}, [activeYear]);
+	}, [activeSlice]);
+
+	useEffect(() => {
+		calculatePositions();
+
+		const handleResize = () => {
+			calculatePositions();
+		};
+
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, [circleRef.current]);
 
 	return (
 		<div className='timeline' ref={containerRef}>
+			<div className='timeline-label'>Исторические даты</div>
+			<div className='timeline-center-line-vertical'></div>
+			<div className='timeline-center-line-horizontal'></div>
 			<div className='timeline-circle' ref={circleRef}>
-				{periods.map((period, index) => {
-					const pos = calculatePositions()[index];
-					return (
-						<button
-							key={period.year}
-							className={`timeline-dot ${
-								activeYear === period.year ? 'active' : ''
-							}`}
-							style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
-							onClick={() => setActiveYear(period.year)}
-						>
-							<span>{period.year}</span>
-						</button>
-					);
-				})}
+				{positions.map((pos, index) => (
+					<TimeButton
+						key={periods[index].title}
+						period={periods[index].id.toString()}
+						activeSlice={activeSlice}
+						pos={pos}
+						index={index}
+						setActiveSlice={setActiveSlice}
+					/>
+				))}
 			</div>
 
 			<div className='timeline-info'>
-				<div className={`swiper-container swiper-container-${activeYear}`}>
-					<div className='swiper-wrapper'>
-						{periods
-							.find((p) => p.year === activeYear)
-							?.events.map((event, index) => (
-								<div key={index} className='swiper-slide'>
-									<h3>{event.year}</h3>
-									<p>{event.description}</p>
-								</div>
-							))}
-					</div>
-				</div>
+				<Swiper
+					className='swiper-container'
+					modules={[Navigation, A11y]}
+					slidesPerView={3}
+					spaceBetween={50}
+					navigation
+				>
+					{periods
+						.find((p) => p.id === activeSlice)
+						?.events.map((event, index) => (
+							<SwiperSlide key={index} className='swiper-slide'>
+								<h3 className='slide-title'>{event.date}</h3>
+								<p className='slide-description'>{event.description}</p>
+							</SwiperSlide>
+						))}
+				</Swiper>
 			</div>
 		</div>
 	);

@@ -13,6 +13,7 @@
 		"@types/react-dom": "^19.0.4",
 		"@types/react-router-dom": "^5.3.3",
 		"gsap": "^3.12.7",
+		"json-server": "^0.17.4",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
 		"react-router-dom": "^7.3.0",
@@ -24,7 +25,8 @@
 		"start": "webpack serve",
 		"build": "webpack",
 		"build-prod": "webpack --mode=production",
-		"clean": "rd /s /q dist"
+		"clean": "rd /s /q dist",
+		"db": "json-server --watch db.json --port 4000"
 	},
 	"eslintConfig": {
 		"extends": [

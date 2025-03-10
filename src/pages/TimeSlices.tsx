@@ -1,44 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Timeline from '../components/Timeline/Timeline';
 
-const periods = [
-	{
-		year: 2015,
-		events: [
-			{
-				date: '13 сентября',
-				year: '2015',
-				description:
-					'Частное солнечное затмение, видимое в Южной Африке и части Антарктиды',
-			},
-		],
-	},
-	{
-		year: 2016,
-		events: [
-			{
-				date: '2016',
-				year: '2016',
-				description: 'Телескоп «Хаббл» обнаружил галактику GN-211',
-			},
-		],
-	},
-	{
-		year: 2017,
-		events: [
-			{
-				date: '2017',
-				year: '2017',
-				description: 'Tesla представила электрический грузовик Semi',
-			},
-		],
-	},
-];
-
 const TimeSlices = () => {
+	const [periods, setPeriods] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
+
+	const fetchPeriods = async () => {
+		try {
+			const response = await fetch('http://localhost:4000/time-slices');
+			const data = await response.json();
+			setPeriods(data);
+		} catch (error) {
+			console.error('Error fetching periods:', error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	useEffect(() => {
 		document.title = 'Time Slices';
+		fetchPeriods();
 	}, []);
+
+	if (isLoading) {
+		return <div>Загрузка...</div>;
+	}
 
 	return (
 		<>
