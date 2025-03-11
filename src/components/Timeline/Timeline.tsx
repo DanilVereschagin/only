@@ -10,21 +10,31 @@ import TimeButton from '../Button/TimeButton';
 
 const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 	const [activeSlice, setActiveSlice] = useState(periods[0].id);
+	const [activeTitle, setActiveTitle] = useState(periods[0].title);
 	const [positions, setPositions] = useState<{ x: number; y: number }[]>([]);
+	const [animatedFrom, setAnimatedFrom] = useState(periods[0].from);
+	const [animatedTo, setAnimatedTo] = useState(periods[0].to);
 	const circleRef = useRef<HTMLDivElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
+	const fromRef = useRef<HTMLDivElement>(null);
+	const toRef = useRef<HTMLDivElement>(null);
 
-	const calculatePositions = () => {
+	const calculatePositions = (activeIndex: number) => {
 		const count = periods.length;
-
 		const circle = circleRef.current;
 		if (!circle) return [];
 
-		const { width, height } = circle.getBoundingClientRect();
+		const { width } = circle.getBoundingClientRect();
 		const radius = width / 2;
 
+		const startAngle = -90;
+		const activeAngle = 30;
+		const angleStep = 360 / count;
+
 		const newPositions = periods.map((_, index) => {
-			const angle = (index * 360) / count - 90;
+			const angle =
+				startAngle + activeAngle + (index - activeIndex) * angleStep;
 			const x = Math.cos((angle * Math.PI) / 180) * radius;
 			const y = Math.sin((angle * Math.PI) / 180) * radius;
 			return {
@@ -33,30 +43,62 @@ const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 			};
 		});
 
-		setPositions(newPositions);
+		return newPositions;
 	};
 
-	const animateTransition = () => {
-		gsap.from(containerRef.current, {
-			duration: 0.5,
-			y: 20,
+	const animatePoints = (newPositions: { x: number; y: number }[]) => {
+		buttonsRef.current.forEach((button, index) => {
+			if (button) {
+				gsap.to(button, {
+					duration: 1,
+					ease: 'circ.out',
+				});
+			}
 		});
 	};
 
 	useEffect(() => {
-		animateTransition();
-	}, [activeSlice]);
+		const activeIndex = periods.findIndex((p) => p.id === activeSlice);
+		const newPositions = calculatePositions(activeIndex);
+		setPositions(newPositions);
+		animatePoints(newPositions);
+	}, [activeSlice, periods]);
 
 	useEffect(() => {
-		calculatePositions();
+		const activeIndex = periods.findIndex((p) => p.id === activeSlice);
 
 		const handleResize = () => {
-			calculatePositions();
+			const newPositions = calculatePositions(activeIndex);
+			setPositions(newPositions);
+			animatePoints(newPositions);
 		};
 
 		window.addEventListener('resize', handleResize);
 		return () => window.removeEventListener('resize', handleResize);
-	}, [circleRef.current]);
+	}, [activeSlice, circleRef.current]);
+
+	useEffect(() => {
+		const activePeriod = periods.find((p) => p.id === activeSlice);
+		if (activePeriod) {
+			setActiveTitle(activePeriod.title);
+
+			gsap.to(fromRef.current, {
+				duration: 1,
+				innerText: activePeriod.from,
+				snap: { innerText: 1 },
+				ease: 'power1.out',
+			});
+
+			gsap.to(toRef.current, {
+				duration: 1,
+				innerText: activePeriod.to,
+				snap: { innerText: 1 },
+				ease: 'power1.out',
+			});
+		}
+	}, [activeSlice, periods]);
+
+	const activePeriod = periods.find((p) => p.id === activeSlice);
 
 	return (
 		<div className='timeline' ref={containerRef}>
@@ -72,8 +114,32 @@ const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 						pos={pos}
 						index={index}
 						setActiveSlice={setActiveSlice}
+						ref={(el) => {
+							buttonsRef.current[index] = el;
+						}}
 					/>
 				))}
+
+				<div className='timeline-date from' ref={fromRef}>
+					{animatedFrom}
+				</div>
+
+				<div className='timeline-date to' ref={toRef}>
+					{animatedTo}
+				</div>
+				<div
+					className='timeline-active-title'
+					style={{
+						top: `${
+							positions.find((_, i) => periods[i].id === activeSlice)?.y
+						}px`,
+						left: `${
+							positions.find((_, i) => periods[i].id === activeSlice)?.x
+						}px`,
+					}}
+				>
+					{activeTitle}
+				</div>
 			</div>
 
 			<div className='timeline-info'>

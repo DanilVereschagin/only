@@ -1,4 +1,4 @@
-$color-lines: #cacaca;
+$color-lines: #42567a;
 
 .timeline {
 	position: relative;
@@ -15,17 +15,18 @@ $color-lines: #cacaca;
 		left: 5%;
 		font-size: 56px;
 		font-weight: bold;
-		color: #42567a;
+		color: $color-lines;
 		z-index: 10;
 		width: 10%;
 	}
 
 	// Центральная вертикальная линия
 	.timeline-center-line-vertical {
+		opacity: 0.5;
 		position: absolute;
 		top: 0;
 		left: 50%;
-		width: 1px;
+		width: 0.1px;
 		height: 95vh;
 		background-color: $color-lines;
 		transform: translateX(-50%);
@@ -34,6 +35,7 @@ $color-lines: #cacaca;
 
 	// Центральная горизонтальная линия
 	.timeline-center-line-horizontal {
+		opacity: 0.5;
 		position: absolute;
 		top: 50%;
 		left: 0;
@@ -46,6 +48,7 @@ $color-lines: #cacaca;
 
 	// Граница слева
 	&::before {
+		opacity: 0.5;
 		content: '';
 		position: absolute;
 		top: 0;
@@ -58,6 +61,7 @@ $color-lines: #cacaca;
 
 	// Граница справа
 	&::after {
+		opacity: 0.5;
 		content: '';
 		position: absolute;
 		top: 0;
@@ -75,12 +79,13 @@ $color-lines: #cacaca;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		border: 1px solid $color-lines;
+		border: 1px solid rgba($color-lines, 0.5);
 		border-radius: 50%;
 		z-index: 2;
 	}
 
 	&-dot {
+		opacity: 1;
 		position: absolute;
 		width: 10px;
 		height: 10px;
@@ -93,7 +98,7 @@ $color-lines: #cacaca;
 		padding: 0;
 		margin: 0;
 		border: 1px solid #6e6e6e;
-		z-index: 1;
+		z-index: 10;
 
 		&.active {
 			width: 56px;
@@ -189,5 +194,36 @@ $color-lines: #cacaca;
 	.swiper-button-prev {
 		left: 0px;
 		margin-left: 20px;
+	}
+
+	.timeline-active-title {
+		position: absolute;
+		font-size: 20px;
+		font-weight: bold;
+		color: $color-lines;
+		z-index: 10;
+		top: 0;
+		left: 0;
+		transform: translate(56px, -50%);
+		white-space: nowrap;
+	}
+
+	.timeline-date {
+		position: absolute;
+		top: 50%;
+		font-size: 200px;
+		font-weight: bold;
+		z-index: 1;
+		transform: translate(-50%, -50%);
+
+		&.from {
+			left: 0;
+			color: #5d5fef;
+		}
+
+		&.to {
+			left: 100%;
+			color: #ef5da8;
+		}
 	}
 }
