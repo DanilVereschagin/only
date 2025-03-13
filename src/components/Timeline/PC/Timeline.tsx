@@ -5,8 +5,8 @@ import 'swiper/scss';
 import 'swiper/scss/navigation';
 import { gsap } from 'gsap';
 import './Timeline.scss';
-import { TimelineProps } from '../../types/Timeline';
-import TimeButton from '../Button/TimeButton';
+import { TimelineProps } from '../../../types/Timeline';
+import TimeButton from '../../Button/TimeButton';
 
 const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 	const [activeSlice, setActiveSlice] = useState(periods[0].id);
@@ -103,6 +103,7 @@ const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 	return (
 		<div className='timeline' ref={containerRef}>
 			<div className='timeline-label'>Исторические даты</div>
+			<div className='gradient-line'></div>
 			<div className='timeline-center-line-vertical'></div>
 			<div className='timeline-center-line-horizontal'></div>
 			<div className='timeline-circle' ref={circleRef}>
@@ -140,6 +141,36 @@ const Timeline: React.FC<TimelineProps> = ({ periods }) => {
 				>
 					{activeTitle}
 				</div>
+			</div>
+
+			<div className='timeline-navigation'>
+				<p className='timeline-navigation-title'>
+					0{activeSlice}/0{periods.length}
+				</p>
+				<button
+					className={`timeline-button ${activeSlice === 1 ? 'disabled' : ''}`}
+					onClick={() => {
+						if (activeSlice > 1) {
+							setActiveSlice(activeSlice - 1);
+						}
+					}}
+					disabled={activeSlice === 1}
+				>
+					{'<'}
+				</button>
+				<button
+					className={`timeline-button ${
+						activeSlice === periods.length ? 'disabled' : ''
+					}`}
+					onClick={() => {
+						if (activeSlice < periods.length) {
+							setActiveSlice(activeSlice + 1);
+						}
+					}}
+					disabled={activeSlice === periods.length}
+				>
+					{'>'}
+				</button>
 			</div>
 
 			<div className='timeline-info'>

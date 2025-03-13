@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Timeline from '../components/Timeline/Timeline';
+import { isMobile } from 'react-device-detect';
+import Timeline from '../components/Timeline/PC/Timeline';
+import TimelineMobile from '../components/Timeline/Mobile/TimelineMobile';
 
 const TimeSlices = () => {
 	const [periods, setPeriods] = useState([]);
@@ -28,7 +30,11 @@ const TimeSlices = () => {
 
 	return (
 		<>
-			<Timeline periods={periods} />
+			{isMobile ? (
+				<TimelineMobile periods={periods} />
+			) : (
+				<Timeline periods={periods} />
+			)}
 		</>
 	);
 };
